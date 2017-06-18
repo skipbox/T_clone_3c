@@ -776,6 +776,7 @@ public class MainActivity extends AppCompatActivity {
             wv1.loadUrl("https://www.google.com/gmail");
             //wl.acquire();
             //*use this for the settings is using PREFERECE MANAGER
+            
             //sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
             //*find the example_text in the pref_general.xml file
             //String hhh = sharedpreferences.getString("example_text","xxx");
