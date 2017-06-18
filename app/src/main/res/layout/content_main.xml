@@ -34,29 +34,37 @@
             android:text="ON" />
 
         <Button
+            android:id="@+id/b_timer_main_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:onClick="buttonOnClick"
+            android:text="OFF" />
+
+        <Button
             android:id="@+id/b_click_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:onClick="buttonOnClick"
-            android:text="CL" />
+            android:text="ADs" />
 
         <Button
             android:id="@+id/b_read_nextad_timer_main"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="buttonOnClick"
-            android:text="GM"
             android:layout_weight="1"
+            android:onClick="buttonOnClick"
+            android:text="CL"
             android:textAlignment="center" />
 
         <Button
             android:id="@+id/b_timer_sub"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:onClick="buttonOnClick"
             android:layout_weight="1"
-            android:text="0" />
+            android:onClick="buttonOnClick"
+            android:text="GM" />
 
     </LinearLayout>
 

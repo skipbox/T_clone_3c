@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
@@ -42,6 +43,7 @@ import goals.dream.t_clone_1.SettingsActivity;
 
 import static android.R.attr.defaultValue;
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
+import static goals.dream.t_clone_1.R.id.b_click_count;
 
 public class MainActivity extends AppCompatActivity {
     //SharedPreferences========================================================
@@ -91,9 +93,12 @@ public class MainActivity extends AppCompatActivity {
     WebView wv1;
 
     Button btn_start_main_timer;
+    Button btn_stop_main_timer;
     Button btn_click_counter;
     Button btn_read_nextad_timer_main;
     Button btn_timer_sub;
+
+    private PowerManager.WakeLock wl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,9 +114,13 @@ public class MainActivity extends AppCompatActivity {
         my_row_id = (EditText) findViewById(R.id.text_row_id);
 
         btn_start_main_timer = (Button) findViewById(R.id.b_timer_main_start);
-        btn_click_counter = (Button) findViewById(R.id.b_click_count);
+        btn_stop_main_timer = (Button) findViewById(R.id.b_timer_main_stop);
+        btn_click_counter = (Button) findViewById(b_click_count);
         btn_read_nextad_timer_main = (Button) findViewById(R.id.b_read_nextad_timer_main);
         btn_timer_sub = (Button) findViewById(R.id.b_timer_sub);
+
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        wl = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "My Tag");
 
 
         //SharedPreferences========================================================
@@ -220,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "document.getElementsByTagName('input')[5].click();" +
+                                    "document.getElementsByTagName('input')[12].click();" +
                                     "})()");
                 }
             }.start();
@@ -238,12 +247,18 @@ public class MainActivity extends AppCompatActivity {
             send_line_to_log = update_text;
             new post_to_log().execute();
 
-            wv1.loadUrl(
+            /*wv1.loadUrl(
                     "javascript:(function() { " +
                             "var input_selector = document.querySelectorAll('input[value=\""+category+"\"]');" +
                             "input_selector[0].checked = true;" +
                             "input_selector[0].click();" +
+                            "})()");*/
+            wv1.loadUrl(
+                    "javascript:(function() { " +
+                            "var by_class_right = document.getElementsByClassName(\"right-side\");" +
+                            "for (i = 0; i < by_class_right.length; i++){if(by_class_right[i].innerText.includes(\""+category+"\")) by_class_right[i].click();}" +
                             "})()");
+
             new CountDownTimer(timer_sub_delay*1000, 100) {
                 @Override
                 public void onTick(long millisUntilFinished) {
@@ -284,11 +299,16 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFinish() {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
-                    wv1.loadUrl(
+                    /*wv1.loadUrl(
                             "javascript:(function() { " +
                                     "var input_selector = document.querySelectorAll('input[value=\""+sub_category+"\"]');" +
                                     //"input_selector[0].checked = true;" +
                                     "input_selector[0].click();" +
+                                    "})()");*/
+                    wv1.loadUrl(
+                            "javascript:(function() { " +
+                                    "var by_class_right = document.getElementsByClassName(\"right-side\");" +
+                                    "for (i = 0; i < by_class_right.length; i++){if(by_class_right[i].innerText.includes(\""+sub_category+"\")) by_class_right[i].click();}" +
                                     "})()");
                 }
             }.start();
@@ -308,11 +328,11 @@ public class MainActivity extends AppCompatActivity {
             String box2 = "";
             String selection2 = "";
 
-            if (category.equals("jo")) box2="remuneration";
-            if (category.equals("fso")) box2="Ask";
+            if (category.contains("job")) box2="remuneration";
+            if (category.contains("sale")) box2="Ask";
 
-            if (category.equals("jo")) selection2="employment_type";
-            if (category.equals("fso") && sub_category.equals("153")) selection2="mobile_os";
+            if (category.contains("job")) selection2="employment_type";
+            if (category.contains("sale") && sub_category.contains("phone")) selection2="mobile_os";
 
             wv1.loadUrl(
                     "javascript:(function() { " +
@@ -399,7 +419,9 @@ public class MainActivity extends AppCompatActivity {
                 public void onFinish() {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     new update_ad_posted().execute();
-                    //wv1.loadUrl("");
+                    //turn off the timer after ad posts below
+                    auto_post = false;
+                    btn_stop_main_timer.setBackgroundColor(Color.MAGENTA);
                 }
             }.start();
         }
@@ -501,8 +523,11 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
 
+            String wakelock_status = " wl OFF";
+            if(wl.isHeld()) wakelock_status = " wl ON";
+
             String update_text = data_from_php;
-            String update_text_merged = update_text + System.getProperty ("line.separator") + my_text_log.getText().toString();
+            String update_text_merged = update_text + wakelock_status + System.getProperty ("line.separator") + my_text_log.getText().toString();
             my_text_log.setText(update_text_merged);
 
             send_line_to_log = update_text;
@@ -565,7 +590,7 @@ public class MainActivity extends AppCompatActivity {
                 sub_category = mainObject.getString("cat_sub");
 
                 title = mainObject.getString("title");
-                body = body.replaceAll("'", "\\\\'");
+                title = title.replaceAll("'", "\\\\'");
                 //body = body.replaceAll("\\\\", "\\\\\\\\");
 
                 body = mainObject.getString("body");
@@ -630,7 +655,14 @@ public class MainActivity extends AppCompatActivity {
       /* and here comes the "trick" */
             if(auto_post){
                 handler.postDelayed(this, timer_main_delay*1000);
-            } else btn_start_main_timer.setText("OFF");
+            } else{
+                btn_start_main_timer.setEnabled(true);
+                btn_start_main_timer.setBackgroundResource(android.R.drawable.btn_default);
+                btn_click_counter.setText("ADs");
+                btn_read_nextad_timer_main.setText("CL");
+                btn_timer_sub.setText("GM");
+                wl.release();
+            }
         }
     };
 
@@ -705,26 +737,27 @@ public class MainActivity extends AppCompatActivity {
     public void buttonOnClick(View view) {
         int the_id = view.getId();
 
-
-
         if (the_id == R.id.b_timer_main_start) {
             if(auto_post == false) {
                 auto_post = true;
                 handler.postDelayed(runnable, 100);
-                btn_start_main_timer.setText("ON");
+                //btn_start_main_timer.setText("ON");
+                btn_stop_main_timer.setBackgroundResource(android.R.drawable.btn_default);
                 btn_start_main_timer.setBackgroundColor(Color.GREEN);
-            } else {
-                auto_post = false;
-                btn_start_main_timer.setBackgroundColor(Color.MAGENTA);
+                btn_start_main_timer.setEnabled(false);
+                wl.acquire();
             }
-
         }
-        if (the_id == R.id.b_click_count) {
-            wv1.loadUrl("https://accounts.craigslist.org/login/home?show_tab=drafts");
+        if (the_id == R.id.b_timer_main_stop) {
+            auto_post = false;
+            btn_stop_main_timer.setBackgroundColor(Color.MAGENTA);
+        }
+        if (the_id == b_click_count) {
+            wv1.loadUrl("http://www.dreamgoals.info/craig/select_ads.php");
             //Toast.makeText(this, "act_3_b_1---"+String.valueOf(count_j), Toast.LENGTH_SHORT).show();
         }
         if (the_id == R.id.b_read_nextad_timer_main) {
-            wv1.loadUrl("https://www.google.com/gmail");
+            wv1.loadUrl("https://accounts.craigslist.org/login/home?show_tab=drafts");
             //new read_nextad_post().execute();
 
         /*  sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
@@ -740,7 +773,8 @@ public class MainActivity extends AppCompatActivity {
             b1_x.setTextColor(Color.parseColor("#0404B4"));*/
         }
         if (the_id == R.id.b_timer_sub) {
-
+            wv1.loadUrl("https://www.google.com/gmail");
+            //wl.acquire();
             //*use this for the settings is using PREFERECE MANAGER
             //sharedpreferences = PreferenceManager.getDefaultSharedPreferences(this);
             //*find the example_text in the pref_general.xml file
@@ -776,5 +810,9 @@ https://post.craigslist.org/k/EkHNznEu5xG5aGaMbNMO4w/LPAj7?lang=en&cc=us&s=previ
 <button class="bigbutton" type="submit" tabindex="1" name="go" value="Continue">publish</button>
 
 https://post.craigslist.org/k/EkHNznEu5xG5aGaMbNMO4w/LPAj7?lang=en&cc=us&s=redirect
+
+android:configChanges="keyboard|keyboardHidden|orientation"
+android:screenOrientation="portrait"
+android:launchMode="singleTask"
 
 */
