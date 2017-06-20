@@ -753,7 +753,7 @@ public class MainActivity extends AppCompatActivity {
             btn_stop_main_timer.setBackgroundColor(Color.MAGENTA);
         }
         if (the_id == b_click_count) {
-            wv1.loadUrl("http://www.dreamgoals.info/craig/select_ads.php");
+            wv1.loadUrl("http://www.dreamgoals.info/cl_post/select_ads.php?email="+email_phone_key);
             //Toast.makeText(this, "act_3_b_1---"+String.valueOf(count_j), Toast.LENGTH_SHORT).show();
         }
         if (the_id == R.id.b_read_nextad_timer_main) {
@@ -790,7 +790,7 @@ public class MainActivity extends AppCompatActivity {
 //notes
 
 /*
-x
+
 https://accounts.craigslist.org/login
 
 https://accounts.craigslist.org/login/home?lang=en&cc=us
