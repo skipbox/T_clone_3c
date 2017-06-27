@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "document.getElementsByTagName('input')[12].click();" +
+                                    "document.getElementsByTagName('button')[0].click();" +
                                     "})()");
                 }
             }.start();
