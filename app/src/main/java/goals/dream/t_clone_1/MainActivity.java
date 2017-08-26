@@ -246,6 +246,7 @@ public class MainActivity extends AppCompatActivity {
 
             send_line_to_log = update_text;
             new post_to_log().execute();
+            
 
             /*wv1.loadUrl(
                     "javascript:(function() { " +
