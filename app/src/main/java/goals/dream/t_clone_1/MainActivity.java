@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity {
 
     String category;
     String sub_category;
+    String m4w;
+    String age;
 
     String employment_type;
     String remuneration;
@@ -194,7 +196,8 @@ public class MainActivity extends AppCompatActivity {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "document.querySelector('.accountform-btn').click();" +
+                                    "var all_buttons = document.getElementsByTagName(\"button\");" +
+                                    "for (i = 0; i < all_buttons.length; i++){if(all_buttons[i].innerText.includes(\"Log\")) all_buttons[i].click();}" +
                                     "})()");
                 }
             }.start();
@@ -229,7 +232,8 @@ public class MainActivity extends AppCompatActivity {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "document.getElementsByTagName('button')[0].click();" +
+                                    "var all_buttons = document.getElementsByTagName(\"button\");" +
+                                    "for (i = 0; i < all_buttons.length; i++){if(all_buttons[i].innerText.includes(\"go\")) all_buttons[i].click();}" +
                                     "})()");
                 }
             }.start();
@@ -272,7 +276,8 @@ public class MainActivity extends AppCompatActivity {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "document.querySelector('.pickbutton').click();" +
+                                    "var all_buttons = document.getElementsByTagName(\"button\");" +
+                                    "for (i = 0; i < all_buttons.length; i++){if(all_buttons[i].innerText.includes(\"continue\")) all_buttons[i].click();}" +
                                     "})()");
                 }
             }.start();
@@ -282,13 +287,19 @@ public class MainActivity extends AppCompatActivity {
 
 
         //STEP 4====================================================================================
-        if(web_url.contains("post.craigslist.org") && web_url.contains("=cat") && auto_post){
+        if(web_url.contains("post.craigslist.org") && (web_url.contains("=cat") || web_url.contains("=ptype")) && auto_post){
             String update_text = "STEP 4: Choose Ad Category (Sub Cat) = " + sub_category;
             String update_text_merged = update_text + System.getProperty ("line.separator") + my_text_log.getText().toString();
             my_text_log.setText(update_text_merged);
 
             send_line_to_log = update_text;
             new post_to_log().execute();
+
+            wv1.loadUrl(
+                    "javascript:(function() { " +
+                            "var by_class_right = document.getElementsByClassName(\"right-side\");" +
+                            "for (i = 0; i < by_class_right.length; i++){if(by_class_right[i].innerText.includes(\""+sub_category+"\")) by_class_right[i].click();}" +
+                            "})()");
 
             new CountDownTimer(timer_sub_delay*1000, 100) {
                 @Override
@@ -300,20 +311,50 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFinish() {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
-                    /*wv1.loadUrl(
-                            "javascript:(function() { " +
-                                    "var input_selector = document.querySelectorAll('input[value=\""+sub_category+"\"]');" +
-                                    //"input_selector[0].checked = true;" +
-                                    "input_selector[0].click();" +
-                                    "})()");*/
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "var by_class_right = document.getElementsByClassName(\"right-side\");" +
-                                    "for (i = 0; i < by_class_right.length; i++){if(by_class_right[i].innerText.includes(\""+sub_category+"\")) by_class_right[i].click();}" +
+                                    "var all_buttons = document.getElementsByTagName(\"button\");" +
+                                    "for (i = 0; i < all_buttons.length; i++){if(all_buttons[i].innerText.includes(\"continue\")) all_buttons[i].click();}" +
                                     "})()");
                 }
             }.start();
         }
+
+
+        if(web_url.contains("post.craigslist.org") && web_url.contains("=ltr") && auto_post){
+            String update_text = "STEP 4b: Choose Personals Type (m4w) = " + m4w;
+            String update_text_merged = update_text + System.getProperty ("line.separator") + my_text_log.getText().toString();
+            my_text_log.setText(update_text_merged);
+
+            send_line_to_log = update_text;
+            new post_to_log().execute();
+
+            wv1.loadUrl(
+                    "javascript:(function() { " +
+                            "var by_class_right = document.getElementsByClassName(\"right-side\");" +
+                            "for (i = 0; i < by_class_right.length; i++){if(by_class_right[i].innerText.includes(\""+m4w+"\")) by_class_right[i].click();}" +
+                            "})()");
+
+            new CountDownTimer(timer_sub_delay*1000, 100) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    btn_timer_sub.setText(String.valueOf(millisUntilFinished/1000));
+                    btn_timer_sub.setBackgroundColor(Color.CYAN);
+                }
+
+                @Override
+                public void onFinish() {
+                    btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
+                    wv1.loadUrl(
+                            "javascript:(function() { " +
+                                    "var all_buttons = document.getElementsByTagName(\"button\");" +
+                                    "for (i = 0; i < all_buttons.length; i++){if(all_buttons[i].innerText.includes(\"continue\")) all_buttons[i].click();}" +
+                                    "})()");
+                }
+            }.start();
+        }
+
+
         //==========================================================================================
 
 
@@ -329,25 +370,70 @@ public class MainActivity extends AppCompatActivity {
             String box2 = "";
             String selection2 = "";
 
-            if (category.contains("job")) box2="remuneration";
-            if (category.contains("sale")) box2="Ask";
+            if (category.contains("job")){
+                box2="remuneration";
+                selection2="employment_type";
+                wv1.loadUrl(
+                        "javascript:(function() { " +
+                                "var body_string = '" + body + "';" +
+                                "body_string = body_string.replace('\\n','<br>');" +
+                                "document.getElementById('PostingTitle').value = '"+title+"';" +
+                                "document.getElementById('GeographicArea').value = '"+geographic_area+"';" +
+                                "document.getElementById('postal_code').value = '"+postal_code+"';" +
+                                "document.getElementById('PostingBody').value = body_string;" +
+                                "document.getElementById('"+box2+"').value = '"+remuneration+"';" +
+                                "document.getElementById('"+selection2+"').value = '"+employment_type+"';" +
+                                "input_selector[0].checked = true;" +
+                                "input_selector[0].click();" +
+                                "})()");
+            }
 
-            if (category.contains("job")) selection2="employment_type";
-            if (category.contains("sale") && sub_category.contains("phone")) selection2="mobile_os";
 
-            wv1.loadUrl(
-                    "javascript:(function() { " +
-                            "var body_string = '" + body + "';" +
-                            "body_string = body_string.replace('\\n','<br>');" +
-                            "document.getElementById('PostingTitle').value = '"+title+"';" +
-                            "document.getElementById('GeographicArea').value = '"+geographic_area+"';" +
-                            "document.getElementById('postal_code').value = '"+postal_code+"';" +
-                            "document.getElementById('PostingBody').value = body_string;" +
-                            "document.getElementById('"+box2+"').value = '"+remuneration+"';" +
-                            "document.getElementById('"+selection2+"').value = '"+employment_type+"';" +
-                            "input_selector[0].checked = true;" +
-                            "input_selector[0].click();" +
-                            "})()");
+            if (category.contains("sale")){
+                box2="Ask";
+                if (category.contains("sale") && sub_category.contains("phone")) selection2="mobile_os";
+                wv1.loadUrl(
+                        "javascript:(function() { " +
+                                "var body_string = '" + body + "';" +
+                                "body_string = body_string.replace('\\n','<br>');" +
+                                "document.getElementById('PostingTitle').value = '"+title+"';" +
+                                "document.getElementById('GeographicArea').value = '"+geographic_area+"';" +
+                                "document.getElementById('postal_code').value = '"+postal_code+"';" +
+                                "document.getElementById('PostingBody').value = body_string;" +
+                                "document.getElementById('"+box2+"').value = '"+remuneration+"';" +
+                                "document.getElementById('"+selection2+"').value = '"+employment_type+"';" +
+                                "input_selector[0].checked = true;" +
+                                "input_selector[0].click();" +
+                                "})()");
+            }
+
+            if (category.contains("personal")){
+                box2="pers_age";
+                wv1.loadUrl(
+                        "javascript:(function() { " +
+                                "var body_string = '" + body + "';" +
+                                "body_string = body_string.replace('\\n','<br>');" +
+                                "document.getElementById('PostingTitle').value = '"+title+"';" +
+                                "document.getElementById('GeographicArea').value = '"+geographic_area+"';" +
+                                "document.getElementById('postal_code').value = '"+postal_code+"';" +
+                                "document.getElementById('PostingBody').value = body_string;" +
+                                "document.getElementById('"+box2+"').value = '"+age+"';" +
+                                "})()");
+            }
+
+            if (category.contains("service")){
+                box2="";
+                wv1.loadUrl(
+                        "javascript:(function() { " +
+                                "var body_string = '" + body + "';" +
+                                "body_string = body_string.replace('\\n','<br>');" +
+                                "document.getElementById('PostingTitle').value = '"+title+"';" +
+                                "document.getElementById('GeographicArea').value = '"+geographic_area+"';" +
+                                "document.getElementById('postal_code').value = '"+postal_code+"';" +
+                                "document.getElementById('PostingBody').value = body_string;" +
+                                "})()");
+            }
+
 
             new CountDownTimer(timer_sub_delay*1000, 100) {
                 @Override
@@ -361,7 +447,8 @@ public class MainActivity extends AppCompatActivity {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "document.querySelector('.bigbutton').click();" +
+                                    "var all_buttons = document.getElementsByTagName(\"button\");" +
+                                    "for (i = 0; i < all_buttons.length; i++){if(all_buttons[i].innerText.includes(\"continue\")) all_buttons[i].click();}" +
                                     "})()");
                 }
             }.start();
@@ -391,7 +478,8 @@ public class MainActivity extends AppCompatActivity {
                     btn_timer_sub.setBackgroundResource(android.R.drawable.btn_default);
                     wv1.loadUrl(
                             "javascript:(function() { " +
-                                    "document.querySelector('.done.bigbutton').click();" +
+                                    "var all_buttons = document.getElementsByTagName(\"button\");" +
+                                    "for (i = 0; i < all_buttons.length; i++){if(all_buttons[i].innerText.includes(\"done with images\")) all_buttons[i].click();}" +
                                     "})()");
                 }
             }.start();
@@ -423,6 +511,8 @@ public class MainActivity extends AppCompatActivity {
                     //turn off the timer after ad posts below
                     auto_post = false;
                     btn_stop_main_timer.setBackgroundColor(Color.MAGENTA);
+                    btn_start_main_timer.setEnabled(true);
+                    btn_start_main_timer.setBackgroundResource(android.R.drawable.btn_default);
                 }
             }.start();
         }
@@ -510,7 +600,7 @@ public class MainActivity extends AppCompatActivity {
         protected Void doInBackground(Void... params) {
 
             try {
-                Document doc = Jsoup.connect("http://www.dreamgoals.info/cl_post/read_nextad_timer.php?email="+email_phone_key).get();
+                Document doc = Jsoup.connect("http://www.dreamgoals.info/cl_post/read_nextad_no_timer.php?email="+email_phone_key).get();
                 data_from_php = doc.text();
 
             } catch (IOException e) {
@@ -589,6 +679,8 @@ public class MainActivity extends AppCompatActivity {
 
                 category = mainObject.getString("cat");
                 sub_category = mainObject.getString("cat_sub");
+                m4w = mainObject.getString("m4w");
+                age = mainObject.getString("age");
 
                 title = mainObject.getString("title");
                 title = title.replaceAll("'", "\\\\'");
@@ -614,6 +706,7 @@ public class MainActivity extends AppCompatActivity {
                                 "postal_code: " + postal_code + System.getProperty ("line.separator") +
                                 "employment_type: " + employment_type + System.getProperty ("line.separator") +
                                 "remuneration: " + remuneration + System.getProperty ("line.separator") +
+                                "age: " + age + System.getProperty ("line.separator") +
                                 "category: " + category + System.getProperty ("line.separator") +
                                 "sub_category: " + sub_category + System.getProperty ("line.separator") +
                                 "title: " + title + System.getProperty ("line.separator") +
@@ -659,7 +752,7 @@ public class MainActivity extends AppCompatActivity {
             } else{
                 btn_start_main_timer.setEnabled(true);
                 btn_start_main_timer.setBackgroundResource(android.R.drawable.btn_default);
-                btn_click_counter.setText("ADs");
+                btn_click_counter.setText("AD");
                 btn_read_nextad_timer_main.setText("CL");
                 btn_timer_sub.setText("GM");
                 wl.release();
@@ -739,19 +832,23 @@ public class MainActivity extends AppCompatActivity {
         int the_id = view.getId();
 
         if (the_id == R.id.b_timer_main_start) {
-            if(auto_post == false) {
+            //if(auto_post == false) {
                 auto_post = true;
-                handler.postDelayed(runnable, 100);
+                new read_nextad_post().execute();
+                //handler.postDelayed(runnable, 100);
                 //btn_start_main_timer.setText("ON");
                 btn_stop_main_timer.setBackgroundResource(android.R.drawable.btn_default);
                 btn_start_main_timer.setBackgroundColor(Color.GREEN);
                 btn_start_main_timer.setEnabled(false);
-                wl.acquire();
-            }
+                //wl.acquire();
+            //}
         }
         if (the_id == R.id.b_timer_main_stop) {
             auto_post = false;
             btn_stop_main_timer.setBackgroundColor(Color.MAGENTA);
+
+            btn_start_main_timer.setEnabled(true);
+            btn_start_main_timer.setBackgroundResource(android.R.drawable.btn_default);
         }
         if (the_id == b_click_count) {
             wv1.loadUrl("http://www.dreamgoals.info/cl_post/select_ads.php?email="+email_phone_key);
@@ -773,7 +870,7 @@ public class MainActivity extends AppCompatActivity {
             b1_x.setText(highScore);
             b1_x.setTextColor(Color.parseColor("#0404B4"));*/
         }
-        if (the_id == R.id.b_timer_sub) {
+        if (the_id == R.id.b_gmail) {
             wv1.loadUrl("https://www.google.com/gmail");
             //wl.acquire();
             //*use this for the settings is using PREFERECE MANAGER
